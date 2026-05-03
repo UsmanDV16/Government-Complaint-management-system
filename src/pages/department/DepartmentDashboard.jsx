@@ -1,26 +1,51 @@
+import { useEffect, useState } from "react";
 import StatCard from "../../components/common/StatCard";
-import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { apiFetch } from "../../api/client";
 
 function DepartmentDashboard() {
-  const { complaints, currentUser } = useAuth();
-  const myDeptComplaints = complaints.filter(
-    (c) => c.departmentId === currentUser.departmentId
-  );
+  const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    apiFetch("/complaints")
+      .then((data) => setComplaints(data.complaints))
+      .catch((err) => setError(err.message))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   return (
     <section>
-      <h2>Department Dashboard</h2>
-      <div className="grid-3">
-        <StatCard title="Total Complaints" value={myDeptComplaints.length} />
-        <StatCard
-          title="In Progress"
-          value={myDeptComplaints.filter((c) => c.status === "In Progress").length}
-        />
-        <StatCard
-          title="Resolved"
-          value={myDeptComplaints.filter((c) => c.status === "Resolved").length}
-        />
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">Department</p>
+          <h2>Resolution Dashboard</h2>
+          <p className="muted">Workload and response metrics.</p>
+        </div>
       </div>
+      {error && <p className="error-text">{error}</p>}
+      {isLoading ? (
+        <div className="card">
+          <LoadingSpinner label="Loading dashboard" size="lg" />
+        </div>
+      ) : (
+        <div className="grid-3">
+          <StatCard title="Total" value={complaints.length} />
+          <StatCard
+            title="Unresolved"
+            value={complaints.filter((c) => c.status === "unresolved").length}
+          />
+          <StatCard
+            title="Awaiting Verification"
+            value={complaints.filter((c) => c.status === "citizen_verifying").length}
+          />
+          <StatCard
+            title="Accepted"
+            value={complaints.filter((c) => c.status === "accepted").length}
+          />
+        </div>
+      )}
     </section>
   );
 }

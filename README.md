@@ -1,16 +1,59 @@
-# React + Vite
+# Government Complaint Management System (MERN)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Full MERN implementation with three roles:
+- Admin: verify complaints, manage departments and users.
+- Department: resolve complaints, add resolution proofs, manage complaint types.
+- Citizen: register with CNIC, submit complaints with proofs, rate resolutions.
 
-Currently, two official plugins are available:
+Complaint statuses: `unresolved` → `resolved` (verification pending) → `verified`.
+If a verified complaint receives a 1–2 star rating, it returns to `resolved` and the rating resets.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
+- Node.js 18+
+- MongoDB Atlas (or local MongoDB)
+- Cloudinary account (for proofs)
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1) Backend
+```bash
+cd server
+npm install
+```
 
-## Expanding the ESLint configuration
+Copy `.env.example` to `.env` and fill in:
+- `MONGO_URI`
+- `JWT_SECRET`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `ADMIN_CNIC`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Start the server:
+```bash
+npm run dev
+```
+
+### 2) Frontend
+```bash
+npm install
+npm run dev
+```
+
+Optional (if not using Vite proxy): create `.env` at project root with:
+```
+VITE_API_URL=http://localhost:4000/api
+```
+
+## MongoDB Atlas Setup
+1. Create a cluster in Atlas.
+2. Create a database user and password.
+3. Add your IP in Network Access.
+4. Copy the connection string and set `MONGO_URI`.
+
+## Cloudinary Setup
+1. Create a Cloudinary account.
+2. Find your Cloud Name, API Key, and API Secret.
+3. Put them in the server `.env` file.
+
+## Seeded Admin
+On first server start, a default admin is created from the `.env` values.
+Use that account to create departments and department users.

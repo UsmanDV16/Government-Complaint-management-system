@@ -1,38 +1,43 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [form, setForm] = useState({
-    email: "citizen@gov.com",
-    password: "123456",
-    role: "citizen"
-  });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = login(form);
+    setIsSubmitting(true);
+    setError("");
+    const result = await login(form);
     if (!result.success) {
       setError(result.message);
+      setIsSubmitting(false);
       return;
     }
-    navigate(`/${form.role}/dashboard`);
+    navigate(`/${result.user.role}/dashboard`);
   };
 
   return (
     <div className="auth-page">
       <form className="card auth-card" onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <p className="muted">Use demo credentials and select your role.</p>
-        <label htmlFor="email">Email</label>
+        <div className="form-header">
+          <p className="eyebrow">Citizen access</p>
+          <h2>Sign in to lodge and track complaints</h2>
+          <p className="muted">Use your CNIC or email to continue.</p>
+        </div>
+        <label htmlFor="identifier">CNIC or Email</label>
         <input
-          id="email"
-          type="email"
-          value={form.email}
-          onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+          id="identifier"
+          value={form.identifier}
+          onChange={(e) => setForm((prev) => ({ ...prev, identifier: e.target.value }))}
+          placeholder="35202-0000000-1"
+          required
         />
         <label htmlFor="password">Password</label>
         <input
@@ -40,22 +45,13 @@ function LoginPage() {
           type="password"
           value={form.password}
           onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+          required
         />
-        <label htmlFor="role">Role</label>
-        <select
-          id="role"
-          value={form.role}
-          onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
-        >
-          <option value="citizen">Citizen</option>
-          <option value="department">Department Officer</option>
-          <option value="admin">Admin</option>
-        </select>
         {error && <p className="error-text">{error}</p>}
-        <button type="submit" className="btn btn-primary">
-          Login
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? <LoadingSpinner label="Signing in" size="sm" /> : "Login"}
         </button>
-        <p>
+        <p className="muted">
           New citizen? <Link to="/register">Register here</Link>
         </p>
       </form>

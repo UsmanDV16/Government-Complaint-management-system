@@ -1,4 +1,4 @@
-function DataTable({ columns, rows, emptyText = "No records found." }) {
+function DataTable({ columns, rows, emptyText = "No records found.", rowKey = "id" }) {
   return (
     <div className="card table-wrap">
       <table className="table">
@@ -18,7 +18,7 @@ function DataTable({ columns, rows, emptyText = "No records found." }) {
             </tr>
           ) : (
             rows.map((row) => (
-              <tr key={row.id}>
+              <tr key={row[rowKey] || row._id || row.id}>
                 {columns.map((column) => (
                   <td key={column.key}>
                     {column.render ? column.render(row) : row[column.key]}
